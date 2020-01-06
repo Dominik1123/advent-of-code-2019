@@ -10,11 +10,14 @@ direction_index = {'U': -1, 'D': -1, 'L': 1, 'R': 1}
 direction_increment = {'U': 1, 'D': -1, 'L': -1, 'R': 1}
 
 def compute_locations(path) -> list:
+    increments = it.starmap(
+        lambda direction, dist: np.stack((direction_increment[direction] * (np.arange(dist) + 1),
+                                          np.zeros(dist, dtype=int))[::direction_index[direction]], axis=1),
+        map(lambda p: (p[0], int(p[1:])), path)
+    )
     return [tuple(xy) for xy in reduce(
         lambda loc, move: np.concatenate((loc, loc[-1] + move)),
-        it.starmap(lambda dir, dist: np.stack((direction_increment[dir] * (np.arange(dist) + 1),
-                                               np.zeros(dist, dtype=int))[::direction_index[dir]], axis=1),
-                   map(lambda p: (p[0], int(p[1:])), path)),
+        increments,
         np.zeros((1, 2), dtype=int)
     )]
 
